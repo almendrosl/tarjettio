@@ -1,5 +1,7 @@
 package com.tarjettio.tarjettio.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,8 +17,13 @@ import java.time.LocalDateTime;
 public class DeckDTO {
 
     private Long id;
+    @NotBlank(message = "El nombre no puede estar vacío")
+    @Size(min = 1, max = 100, message = "El nombre debe tener entre 1 y 100 caracteres")
     private String name;
+
+    @Size(max = 500, message = "La descripción no puede exceder los 500 caracteres")
     private String description;
+
     private String userId;
     private int cardCount;
     private int cardsToReviewCount;

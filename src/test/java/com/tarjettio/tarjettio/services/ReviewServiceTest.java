@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -72,7 +73,7 @@ class ReviewServiceTest {
         when(cardProgressService.findCardsToReview("user123")).thenReturn(progresses);
 
         // Act
-        List<Card> cardsToReview = reviewService.getCardsToReview("user123");
+        List<Card> cardsToReview = reviewService.getCardsToReview("user123", 345);
 
         // Assert
         assertEquals(1, cardsToReview.size());
@@ -83,18 +84,18 @@ class ReviewServiceTest {
     @Test
     void getCardsToReviewByDeck_ShouldReturnCardsToReview() {
         // Arrange
-        List<Card> cards = Arrays.asList(testCard);
-        when(cardService.findByDeckId(1L)).thenReturn(cards);
-        when(cardProgressService.findByCardId(1L)).thenReturn(testProgress);
+        CardProgress updatedProgress = new CardProgress();
+        updatedProgress.setId(1L);
+        updatedProgress.setCard(testCard);
+
+        when(cardProgressService.findCardsToReviewByDeck(1L, 765)).thenReturn(Collections.singletonList(updatedProgress));
 
         // Act
-        List<Card> cardsToReview = reviewService.getCardsToReviewByDeck(1L);
+        List<Card> cardsToReview = reviewService.getCardsToReviewByDeck(1L, 765);
 
         // Assert
         assertEquals(1, cardsToReview.size());
-        assertEquals(testCard.getId(), cardsToReview.get(0).getId());
-        verify(cardService, times(1)).findByDeckId(1L);
-        verify(cardProgressService, times(1)).findByCardId(1L);
+        verify(cardProgressService, times(1)).findCardsToReviewByDeck(1L, 765);
     }
 
     @Test

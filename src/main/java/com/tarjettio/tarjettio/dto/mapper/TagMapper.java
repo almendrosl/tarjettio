@@ -26,6 +26,7 @@ public class TagMapper {
                 tag.getId(),
                 tag.getName(),
                 tag.getUser().getId(),
+                tag.getColor(),
                 tag.getCards().size(),
                 tag.getCreatedAt(),
                 tag.getUpdatedAt()

@@ -32,7 +32,7 @@ public class ReviewService {
      * @param userId ID del usuario
      * @return Lista de tarjetas pendientes de repaso
      */
-    public List<Card> getCardsToReview(String userId) {
+    public List<Card> getCardsToReview(String userId, int limit) {
         List<CardProgress> progresses = cardProgressService.findCardsToReview(userId);
         return progresses.stream()
                 .map(CardProgress::getCard)
@@ -45,18 +45,14 @@ public class ReviewService {
      * @param deckId ID del mazo
      * @return Lista de tarjetas pendientes de repaso
      */
-    public List<Card> getCardsToReviewByDeck(Long deckId) {
-        // Obtener todas las tarjetas del mazo
-        List<Card> cards = cardService.findByDeckId(deckId);
-        LocalDateTime now = LocalDateTime.now();
+    public List<Card> getCardsToReviewByDeck(Long deckId, int limit) {
+        // Obtener directamente de la base de datos las tarjetas que necesitan repaso con límite
+        List<CardProgress> progresses = cardProgressService.findCardsToReviewByDeck(deckId, limit);
 
-        // Filtrar las tarjetas que necesitan repaso
-        return cards.stream()
-                .filter(card -> {
-                    CardProgress progress = cardProgressService.findByCardId(card.getId());
-                    return progress != null && progress.getNextReviewDate().isBefore(now);
-                })
-                .collect(Collectors.toList());
+        // Convertir los progresos a tarjetas
+        return progresses.stream()
+                .map(CardProgress::getCard)
+                .toList();
     }
 
     /**

@@ -27,6 +27,8 @@ public class Tag {
     @JoinColumn(name = "user_id")
     private User user;
 
+    private String color;
+
     @ManyToMany(mappedBy = "tags")
     private Set<Card> cards = new HashSet<>();
 

@@ -19,5 +19,7 @@ public class DeckStatsDTO {
     private int newCards;
     private int learningCards;
     private int reviewCards;
+    private int dueCards;
+    private int masteredCards;
     private double masteryPercentage;
 }

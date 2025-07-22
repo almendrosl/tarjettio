@@ -76,7 +76,7 @@ public class DeckService {
      * @param deckId ID del mazo
      * @return Número de tarjetas
      */
-    public long countCardsByDeckId(Long deckId) {
+    public int countCardsByDeckId(Long deckId) {
         return deckRepository.countCardsByDeckId(deckId);
     }
 
@@ -96,5 +96,15 @@ public class DeckService {
      */
     public void deleteDeck(Long id) {
         deckRepository.deleteById(id);
+    }
+
+    /**
+     * Cuenta el número de mazos que pertenecen a un usuario específico
+     * 
+     * @param userId ID del usuario
+     * @return Número de mazos del usuario
+     */
+    public int countDecksByUserId(String userId) {
+        return deckRepository.findByUserId(userId).size();
     }
 }

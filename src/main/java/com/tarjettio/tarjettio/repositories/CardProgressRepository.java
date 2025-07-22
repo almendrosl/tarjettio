@@ -1,6 +1,7 @@
 package com.tarjettio.tarjettio.repositories;
 
 import com.tarjettio.tarjettio.entities.CardProgress;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -38,4 +39,15 @@ public interface CardProgressRepository extends JpaRepository<CardProgress, Long
      */
     @Query("SELECT COUNT(cp) FROM CardProgress cp JOIN cp.card c WHERE c.deck.id = :deckId AND cp.nextReviewDate <= :now")
     long countCardsToReviewByDeck(Long deckId, LocalDateTime now);
+
+    /**
+     * Encuentra las tarjetas que deben ser repasadas para un mazo específico con límite
+     * 
+     * @param deckId ID del mazo
+     * @param now Fecha y hora actual
+     * @param pageable Límite de tarjetas a retornar
+     * @return Lista de progresos de tarjetas
+     */
+    @Query("SELECT cp FROM CardProgress cp JOIN cp.card c WHERE c.deck.id = :deckId AND cp.nextReviewDate <= :now ORDER BY cp.nextReviewDate ASC")
+    List<CardProgress> findCardsToReviewByDeck(Long deckId, LocalDateTime now, Pageable pageable);
 }

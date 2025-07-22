@@ -135,13 +135,13 @@ class DeckServiceTest {
     @Test
     void countCardsByDeckId_ShouldReturnCardCount() {
         // Arrange
-        when(deckRepository.countCardsByDeckId(1L)).thenReturn(5L);
+        when(deckRepository.countCardsByDeckId(1L)).thenReturn(5);
 
         // Act
         long cardCount = deckService.countCardsByDeckId(1L);
 
         // Assert
-        assertEquals(5L, cardCount);
+        assertEquals(5, cardCount);
         verify(deckRepository, times(1)).countCardsByDeckId(1L);
     }
 

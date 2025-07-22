@@ -27,6 +27,8 @@ public interface DeckRepository extends JpaRepository<Deck, Long> {
      */
     List<Deck> findByUserId(String userId);
 
+    int countByUserId(String userId);
+
     /**
      * Encuentra un mazo por su nombre y usuario
      * 
@@ -43,5 +45,5 @@ public interface DeckRepository extends JpaRepository<Deck, Long> {
      * @return Número de tarjetas
      */
     @Query("SELECT COUNT(c) FROM Card c WHERE c.deck.id = :deckId")
-    long countCardsByDeckId(Long deckId);
+    int countCardsByDeckId(Long deckId);
 }

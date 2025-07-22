@@ -17,6 +17,7 @@ public class TagDTO {
     private Long id;
     private String name;
     private String userId;
+    private String color;
     private int cardCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

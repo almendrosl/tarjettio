@@ -75,4 +75,21 @@ public class UserService {
     public void deleteUser(String id) {
         userRepository.deleteById(id);
     }
+
+    /**
+     * Actualiza los datos de un usuario existente
+     * 
+     * @param user Usuario con los datos actualizados
+     * @return El usuario actualizado
+     */
+    public User updateUser(User user) {
+        // Verificamos que el usuario exista
+        if (user.getId() == null || !userRepository.existsById(user.getId())) {
+            throw new IllegalArgumentException("No se puede actualizar un usuario inexistente");
+        }
+
+        // Actualizamos el usuario en la base de datos
+        // El método save en JpaRepository actualiza si el ID ya existe
+        return userRepository.save(user);
+    }
 }
