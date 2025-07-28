@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Iniciar Sesión / Registrarse</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .form-container {
+            background: #f5f5f5;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .form-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-button.active {
+            border-bottom-color: #007bff;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .form-section {
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="email"], input[type="password"], input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            background: #0056b3;
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+<div class="form-container">
+    <h1>Bienvenido</h1>
+
+    <!-- Pestañas para alternar entre Login y Registro -->
+    <div class="form-tabs">
+        <button class="tab-button active" onclick="showTab('login')">Iniciar Sesión</button>
+        <button class="tab-button" onclick="showTab('register')">Crear Cuenta</button>
+    </div>
+
+    <!-- Formulario de Login -->
+    <div id="login-section" class="form-section active">
+        <h2>Iniciar Sesión</h2>
+        <form id="login-form">
+            <div class="form-group">
+                <label for="login-email">Email:</label>
+                <input type="email" id="login-email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="login-password">Contraseña:</label>
+                <input type="password" id="login-password" name="password" required>
+            </div>
+            <button type="submit" class="submit-btn">Ingresar</button>
+        </form>
+    </div>
+
+    <!-- Formulario de Registro -->
+    <div id="register-section" class="form-section">
+        <h2>Crear Nueva Cuenta</h2>
+        <form id="register-form">
+            <div class="form-group">
+                <label for="register-name">Nombre completo:</label>
+                <input type="text" id="register-name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="register-email">Email:</label>
+                <input type="email" id="register-email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="register-password">Contraseña:</label>
+                <input type="password" id="register-password" name="password" required minlength="6">
+            </div>
+            <div class="form-group">
+                <label for="register-confirm-password">Confirmar contraseña:</label>
+                <input type="password" id="register-confirm-password" name="confirmPassword" required minlength="6">
+            </div>
+            <button type="submit" class="submit-btn">Crear Cuenta</button>
+        </form>
+    </div>
+
+    <!-- Mensajes de error/éxito -->
+    <div id="message-container"></div>
+</div>
+
+<script th:inline="javascript">
+    // 1. Inicializa Supabase
+    const supabaseUrl = [[${@environment.getProperty('supabase.url')}]];
+    const supabaseAnonKey = [[${@environment.getProperty('supabase.anon-key')}]];
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const messageContainer = document.getElementById('message-container');
+
+    // Función para mostrar mensajes
+    function showMessage(message, type = 'error') {
+        messageContainer.innerHTML = `<div class="message ${type}">${message}</div>`;
+        setTimeout(() => {
+            messageContainer.innerHTML = '';
+        }, 5000);
+    }
+
+    // Función para alternar entre pestañas
+    function showTab(tabName) {
+        // Ocultar todas las secciones
+        document.querySelectorAll('.form-section').forEach(section => {
+            section.classList.remove('active');
+        });
+
+        // Remover clase active de todos los botones
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.classList.remove('active');
+        });
+
+        // Mostrar la sección seleccionada
+        document.getElementById(`${tabName}-section`).classList.add('active');
+
+        // Activar el botón correspondiente
+        event.target.classList.add('active');
+
+        // Limpiar mensajes
+        messageContainer.innerHTML = '';
+    }
+
+    // 2. Manejo del formulario de login
+    loginForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const email = loginForm.email.value;
+        const password = loginForm.password.value;
+
+        // Deshabilitar botón mientras procesa
+        const submitBtn = loginForm.querySelector('.submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Ingresando...';
+
+        try {
+            // Autentica con Supabase
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password,
+            });
+
+            if (error) {
+                showMessage('Error: ' + error.message, 'error');
+            } else if (data.session) {
+                // Si es exitoso, envía el token al backend de Spring Boot
+                const accessToken = data.session.access_token;
+
+                const response = await fetch('/login-con-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token: accessToken })
+                });
+
+                if (response.ok) {
+                    showMessage('Inicio de sesión exitoso. Redirigiendo...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 1500);
+                } else {
+                    showMessage('Error al iniciar sesión en el servidor.', 'error');
+                }
+            }
+        } catch (serverError) {
+            showMessage('Error de conexión con el servidor.', 'error');
+        } finally {
+            // Rehabilitar botón
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Ingresar';
+        }
+    });
+
+    // 3. Manejo del formulario de registro
+    registerForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const name = registerForm.name.value;
+        const email = registerForm.email.value;
+        const password = registerForm.password.value;
+        const confirmPassword = registerForm.confirmPassword.value;
+
+        // Validar que las contraseñas coincidan
+        if (password !== confirmPassword) {
+            showMessage('Las contraseñas no coinciden.', 'error');
+            return;
+        }
+
+        // Validar longitud de contraseña
+        if (password.length < 6) {
+            showMessage('La contraseña debe tener al menos 6 caracteres.', 'error');
+            return;
+        }
+
+        // Deshabilitar botón mientras procesa
+        const submitBtn = registerForm.querySelector('.submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creando cuenta...';
+
+        try {
+            // Registrar usuario en Supabase
+            const { data, error } = await supabase.auth.signUp({
+                email: email,
+                password: password,
+                options: {
+                    data: {
+                        full_name: name,
+                    }
+                }
+            });
+
+            if (error) {
+                showMessage('Error al crear la cuenta: ' + error.message, 'error');
+            } else {
+                if (data.user && !data.session) {
+                    // Usuario creado pero necesita confirmar email
+                    showMessage('Cuenta creada exitosamente. Por favor, revisa tu email para confirmar tu cuenta.', 'info');
+
+                    // Cambiar a la pestaña de login después de 3 segundos
+                    setTimeout(() => {
+                        showTab('login');
+                        document.querySelector('.tab-button').click(); // Activar visualmente la pestaña
+                    }, 3000);
+                } else if (data.session) {
+                    // Usuario creado y ya autenticado
+                    showMessage('Cuenta creada exitosamente. Iniciando sesión...', 'success');
+
+                    // Enviar token al backend
+                    const accessToken = data.session.access_token;
+
+                    const response = await fetch('/login-con-token', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ token: accessToken })
+                    });
+
+                    if (response.ok) {
+                        setTimeout(() => {
+                            window.location.href = '/dashboard';
+                        }, 1500);
+                    } else {
+                        showMessage('Cuenta creada, pero error al iniciar sesión. Intenta iniciar sesión manualmente.', 'info');
+                        setTimeout(() => {
+                            showTab('login');
+                        }, 3000);
+                    }
+                }
+            }
+        } catch (serverError) {
+            showMessage('Error de conexión con el servidor.', 'error');
+        } finally {
+            // Rehabilitar botón
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Crear Cuenta';
+        }
+    });
+
+    // Hacer la función showTab global para los botones
+    window.showTab = showTab;
+</script>
+</body>
+</html>
