@@ -8,6 +8,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class HomeController {
 
+    @GetMapping("/")
+    public String home(Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            return "redirect:/dashboard";
+        }
+        return "redirect:/login";
+    }
+
     @GetMapping("/login")
     public String index(Authentication authentication) {
         if (authentication != null && authentication.isAuthenticated()) {
@@ -17,7 +25,7 @@ public class HomeController {
     }
 
     @GetMapping("/dashboard")
-    public String home() {
+    public String dashboard() {
         return "dashboard"; // dashboard.html (protegida)
     }
 
