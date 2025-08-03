@@ -12,13 +12,21 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.tarjettio.tarjettio.utils.Credentials.getCurrentUserId;
 
 /**
  * Controlador para operaciones con mazos
@@ -146,19 +154,10 @@ public class DeckController {
         List<Deck> decks = deckService.findByNameContainingAndUser(query, user);
         List<DeckDTO> deckDTOs = decks.stream()
                 .map(deckMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
 
         return ResponseEntity.ok(deckDTOs);
     }
 
-    /**
-     * Obtiene el ID del usuario autenticado
-     */
-    private String getCurrentUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new UnauthorizedException("Usuario no autenticado");
-        }
-        return authentication.getName();
-    }
+
 }

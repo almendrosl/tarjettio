@@ -74,7 +74,7 @@ public class AuthController {
 
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     userDetails,
-                    null,
+                    appUser,
                     userDetails.getAuthorities()
             );
 
