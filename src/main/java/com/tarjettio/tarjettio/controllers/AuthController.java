@@ -7,6 +7,8 @@ import com.tarjettio.tarjettio.services.UserService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,6 +26,8 @@ import java.util.Map;
 @RestController
 public class AuthController {
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+
     private final JwtService jwtService;
     private final UserService userService;
     private final SecurityContextRepository securityContextRepository;
@@ -39,7 +43,8 @@ public class AuthController {
         String token = tokenDto.getToken();
 
         if (token == null || !jwtService.isTokenValid(token)) {
-            return ResponseEntity.status(401).body("Token inválido o expirado.");
+            logger.warn("Intento de login con token inválido o nulo.");
+            return ResponseEntity.status(401).body(Map.of("error", "Token inválido o expirado."));
         }
 
         try {
@@ -80,7 +85,8 @@ public class AuthController {
 
             securityContextRepository.saveContext(context, request, response);
 
-            return ResponseEntity.ok().body("Login en backend exitoso. Sesión creada.");
+            logger.info("Usuario {} autenticado exitosamente y sesión creada.", appUser.getEmail());
+            return ResponseEntity.ok().body(Map.of("message", "Login en backend exit"));
 
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error en el servidor durante la autenticación.");

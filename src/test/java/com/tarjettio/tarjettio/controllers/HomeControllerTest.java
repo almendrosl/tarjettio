@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -50,7 +51,8 @@ class HomeControllerTest {
     @Test
     void testLoginPage_WhenNotAuthenticated_ShouldShowLoginPage() throws Exception {
         // Ejecutar la petición sin autenticación y verificar que muestra la vista de login
-        mockMvc.perform(get("/login"))
+        mockMvc.perform(get("/login")
+                .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(view().name("login"));
     }

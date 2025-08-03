@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <title>Iniciar Sesión / Registrarse</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -169,14 +172,21 @@
 </div>
 
 <script th:inline="javascript">
-    // 1. Inicializa Supabase
-    const supabaseUrl = [[${@environment.getProperty('supabase.url')}]];
-    const supabaseAnonKey = [[${@environment.getProperty('supabase.anon-key')}]];
+    /*<![CDATA[*/
+
+    // Inicialización segura de variables de Supabase
+    const supabaseUrl = /*[[${@environment.getProperty('supabase.url')}]]*/ 'default-url';
+    const supabaseAnonKey = /*[[${@environment.getProperty('supabase.anon-key')}]]*/ 'default-key';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
 
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
     const messageContainer = document.getElementById('message-container');
+
+    // Obtener el token CSRF de los meta tags
+    const csrfToken = document.querySelector("meta[name='_csrf']").content;
+    const csrfHeader = document.querySelector("meta[name='_csrf_header']").content;
+
 
     // Función para mostrar mensajes
     function showMessage(message, type = 'error') {
@@ -236,6 +246,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken  // Incluir el token CSRF en el header
                     },
                     body: JSON.stringify({ token: accessToken })
                 });
@@ -346,6 +357,8 @@
 
     // Hacer la función showTab global para los botones
     window.showTab = showTab;
+
+    /*]]>*/
 </script>
 </body>
 </html>
